@@ -484,16 +484,19 @@
     fill(light, first);
     fill(heavy, last);
     var place = function(n){
-      /* live-read offsets each step so the font swap can't strand the cursor */
+      /* live-read offsets each step so the font swap can't strand the cursor;
+         reads happen before any writes in the same task, so layout stays clean
+         and no forced reflow occurs */
       var target = n < chars.length ? chars[n].offsetLeft : cursor.offsetLeft;
-      cursor.style.transform = 'translateX(' + (target - cursor.offsetLeft) + 'px)';
+      return target - cursor.offsetLeft;
     };
-    place(0);
+    cursor.style.transform = 'translateX(' + place(0) + 'px)';
     var i = 0, total = chars.length;
     var step = function(){
-      chars[i].classList.add('on');
+      var tx = place(i + 1);            /* read first: layout is clean */
+      chars[i].classList.add('on');      /* then write */
+      cursor.style.transform = 'translateX(' + tx + 'px)';
       i++;
-      place(i);
       if (i < total){
         setTimeout(step, 60 + Math.random() * 80);
       } else {
