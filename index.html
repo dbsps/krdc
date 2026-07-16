@@ -104,7 +104,9 @@
   .mark{font-family:'Space Grotesk','Space Grotesk Fallback',sans-serif;font-size:22px;letter-spacing:-0.02em;text-decoration:none;white-space:nowrap}
   .mark .light{font-weight:400}
   .mark .heavy{font-weight:700}
-  .mark .cursor{font-weight:700;color:var(--teal)}
+  .mark .cursor{font-weight:700;color:var(--teal);display:inline-block}
+  .mark .tc{opacity:0}
+  .mark .tc.on{opacity:1}
   .nav-right{display:flex;align-items:center;gap:14px}
   .nav-links{display:flex;align-items:center;gap:28px;font-family:'JetBrains Mono','JetBrains Mono Fallback',monospace;font-size:13px}
   .nav-links a{color:var(--muted);text-decoration:none;transition:color .15s}
@@ -465,15 +467,33 @@
     light.textContent = first;
     heavy.textContent = last;
   } else {
-    var i = 0, total = first.length + last.length;
+    /* Full text is laid out immediately (opacity:0 per char) and revealed on a
+       typing cadence; the cursor travels via transform. Opacity + transform are
+       CLS-exempt, so the animation causes zero layout shift. */
+    var cursor = document.getElementById('mark-cursor');
+    var chars = [];
+    var fill = function(el, text){
+      text.split('').forEach(function(ch){
+        var s = document.createElement('span');
+        s.className = 'tc';
+        s.textContent = ch;
+        el.appendChild(s);
+        chars.push(s);
+      });
+    };
+    fill(light, first);
+    fill(heavy, last);
+    var place = function(n){
+      /* live-read offsets each step so the font swap can't strand the cursor */
+      var target = n < chars.length ? chars[n].offsetLeft : cursor.offsetLeft;
+      cursor.style.transform = 'translateX(' + (target - cursor.offsetLeft) + 'px)';
+    };
+    place(0);
+    var i = 0, total = chars.length;
     var step = function(){
+      chars[i].classList.add('on');
       i++;
-      if (i <= first.length){
-        light.textContent = first.slice(0, i);
-      } else {
-        light.textContent = first;
-        heavy.textContent = last.slice(0, i - first.length);
-      }
+      place(i);
       if (i < total){
         setTimeout(step, 60 + Math.random() * 80);
       } else {
