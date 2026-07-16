@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
+<!--
+
+    Viewing the source? "My my... what a forward young man you are."
+                                                      (— Anne Hathaway, 2011)
+
+    Yes, it's hand-written. No, there's no framework. The fonts are
+    self-hosted, subset, and metric-matched so the swap never moves a
+    pixel. The schema is at the bottom of the head, and the whole page
+    weighs less than one hero image on the last agency site you visited.
+
+    The cursor used to blink forever. I took feedback. It settles down
+    after six seconds. So will you.
+
+    (It types via opacity and transform now, too, so it can't shift
+    layout. The things one does for a round number.)
+
+                                                      kris@roadruck.com
+
+-->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kris Roadruck — tech &times; marketing</title>
@@ -341,6 +360,80 @@
     }
   }
 </style>
+<!-- structured data: the part the nerds actually came for.
+     sameAs is intentionally absent — add LinkedIn/GitHub/X profile URLs
+     to the Person node when you feel like being findable. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://www.krisroadruck.com/#website",
+      "url": "https://www.krisroadruck.com/",
+      "name": "Kris Roadruck",
+      "publisher": {
+        "@id": "https://www.krisroadruck.com/#kris"
+      }
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": "https://www.krisroadruck.com/#page",
+      "url": "https://www.krisroadruck.com/",
+      "name": "Kris Roadruck — tech × marketing",
+      "isPartOf": {
+        "@id": "https://www.krisroadruck.com/#website"
+      },
+      "mainEntity": {
+        "@id": "https://www.krisroadruck.com/#kris"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://www.krisroadruck.com/#kris",
+      "name": "Kris Roadruck",
+      "url": "https://www.krisroadruck.com/",
+      "email": "mailto:kris@roadruck.com",
+      "jobTitle": "Independent Consultant — Tech × Marketing",
+      "description": "Independent consultant working the seam between engineering and marketing. Technical SEO, content strategy, Google Ads, AI/LLM work, and fractional CMO engagements.",
+      "hasOccupation": {
+        "@type": "Occupation",
+        "name": "Marketing technology consultant"
+      },
+      "knowsAbout": [
+        "Technical SEO",
+        "Content strategy",
+        "Google Ads",
+        "Large language models",
+        "Marketing technology",
+        "Web development",
+        "WordPress"
+      ]
+    },
+    {
+      "@type": "ProfessionalService",
+      "@id": "https://www.krisroadruck.com/#service",
+      "name": "Kris Roadruck",
+      "url": "https://www.krisroadruck.com/",
+      "founder": {
+        "@id": "https://www.krisroadruck.com/#kris"
+      },
+      "slogan": "Marketing that survives contact with the codebase",
+      "description": "Independent consulting at the seam between engineering and marketing: technical SEO, content strategy, Google Ads, AI/LLM work, and fractional CMO leadership.",
+      "serviceType": [
+        "Technical SEO",
+        "Content strategy",
+        "Google Ads management",
+        "AI & LLM consulting",
+        "Fractional CMO"
+      ],
+      "areaServed": "Worldwide",
+      "priceRange": "Retainers from $5K/mo; one-off projects if they're interesting",
+      "email": "mailto:kris@roadruck.com"
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -407,7 +500,7 @@
 
       <section class="bench">
         <h3 id="heading-bench">Plus: the bench.</h3>
-        <p>I'm a spiky generalist &mdash; deep on strategy and execution, broad enough to be dangerous at almost anything else, and honest enough to know when dangerous isn't enough.</p>
+        <p>I'm a spiky generalist &mdash; deep in several parts of marketing and technology, broad enough across the rest to be dangerous, and honest enough to know when dangerous isn't enough.</p>
         <p>Seventeen years in also buys you people: a network of analysts, devs, and subject-matter experts I trust, built one project at a time. When a problem edges past my depth, small stuff gets handled through the favor economy at no cost to you; for bigger jobs, I source the right specialists and manage the work myself. You hire one consultant. You get the network.</p>
       </section>
 
@@ -517,10 +610,12 @@
   /* --- theme toggle --- */
   var root = document.documentElement;
   var toggle = document.getElementById('theme-toggle');
+  var themeMeta = document.querySelector('meta[name="theme-color"]');
   function paintToggle(){
     var dark = root.getAttribute('data-theme') !== 'light';
     toggle.textContent = dark ? 'light_' : 'dark_';
     toggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    if (themeMeta){ themeMeta.setAttribute('content', dark ? '#0C1826' : '#F5F7F8'); }
   }
   toggle.addEventListener('click', function(){
     var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
@@ -536,9 +631,15 @@
   var navRight = document.querySelector('.nav-right');
   
   function setMenu(open){
+    var wasOpen = burger.getAttribute('aria-expanded') === 'true';
     burger.setAttribute('aria-expanded', open ? 'true' : 'false');
     burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     links.classList.toggle('open', open);
+    /* closing a menu that contains the focused element strands focus on <body>;
+       hand it back to the burger (mobile only - desktop links are always visible) */
+    if (wasOpen && !open && window.matchMedia('(max-width:720px)').matches){
+      burger.focus();
+    }
   }
   
   burger.addEventListener('click', function(){
