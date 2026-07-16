@@ -3,7 +3,7 @@
 <head>
 <!--
 
-    Viewing the source? "My my... what a forward young man you are."
+    Viewing the source? My my... what a forward young man you are.
                                                       (— Anne Hathaway, 2011)
 
     Yes, it's hand-written. No, there's no framework. The fonts are
@@ -40,6 +40,7 @@
 <meta name="theme-color" content="#0C1826">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@krisroadruck">
+<meta name="twitter:image:alt" content="Kris Roadruck — tech × marketing">
 <script>
 (function(){
   try{
@@ -259,7 +260,6 @@
   .email-mark .tld{font-weight:400;color:var(--muted);transition:color .15s}
   .email-mark:hover .tld{color:var(--paper)}
   .contact p{color:var(--muted);max-width:52ch;margin-top:26px}
-  .mail-alt{display:inline-block;margin-top:20px;font-family:'JetBrains Mono','JetBrains Mono Fallback',monospace;font-size:13px;color:var(--muted);text-decoration:none;transition:color .15s}
   .mail-alt:hover{color:var(--paper)}
   .mail-alt .u{color:var(--teal)}
 
@@ -353,13 +353,28 @@
     }
   }
 
+  .copy-fail{display:block;margin-top:10px;font-family:'JetBrains Mono','JetBrains Mono Fallback',monospace;font-size:13px;color:var(--muted)}
+  .copy-fail .sel{color:var(--teal);user-select:all;-webkit-user-select:all}
+  .copy-fail[hidden]{display:none}
   @media (prefers-reduced-motion: reduce) {
     .copy-feedback {
       transition: none;
       transform: none;
     }
+    .burger span{transition:none}
+    html,body{transition:none}
   }
 </style>
+<noscript><style>
+  /* without JS the toggle and burger are inert; show the links in flow instead */
+  .theme-toggle,.burger{display:none}
+  @media (max-width:720px){
+    nav{flex-wrap:wrap}
+    .nav-right{width:100%}
+    .nav-links{display:flex;position:static;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 14px;padding:0;border:0;background:none;width:100%}
+    .nav-links a,.nav-links .mail{width:auto;padding:6px 0;font-size:13px}
+  }
+</style></noscript>
 <!-- structured data: the part the nerds actually came for.
      sameAs is intentionally absent — add LinkedIn/GitHub/X profile URLs
      to the Person node when you feel like being findable. -->
@@ -453,7 +468,7 @@
         <div class="nav-links" id="nav-links">
           <a href="#what-i-do">what i do</a>
           <a href="#say-less">say less</a>
-          <button type="button" class="mail" id="nav-copy-btn" aria-label="Copy email address to clipboard">kris@roadruck.com</button>
+          <a class="mail" id="nav-copy-btn" href="mailto:kris@roadruck.com">kris@roadruck.com</a>
         </div>
       </div>
     </nav>
@@ -464,7 +479,7 @@
   <div class="wrap">
     <div class="hero">
       <div class="eyebrow">independent consultant <b>&middot;</b> tech &times; marketing <b>&middot;</b> 17+ years</div>
-      <h1>Marketing that survives contact with the codebase<span class="blink">_</span></h1>
+      <h1>Marketing that survives contact with the codebase<span class="blink" aria-hidden="true">_</span></h1>
       <p>Most companies have a gap between the people who build and the people who market. I live in that gap &mdash; technical SEO, content, paid search, some dev, and lately a lot of AI and LLM work. I'm the person both teams assume is on their side. <span class="aside">(Correct.)</span></p>
     </div>
   </div>
@@ -500,7 +515,7 @@
 
       <section class="bench">
         <h3 id="heading-bench">Plus: the bench.</h3>
-        <p>I'm a spiky generalist &mdash; deep in several parts of marketing and technology, broad enough across the rest to be dangerous, and honest enough to know when dangerous isn't enough.</p>
+        <p>I'm a spiky generalist &mdash; deep on strategy and execution, broad enough to be dangerous at almost anything else, and honest enough to know when dangerous isn't enough.</p>
         <p>Seventeen years in also buys you people: a network of analysts, devs, and subject-matter experts I trust, built one project at a time. When a problem edges past my depth, small stuff gets handled through the favor economy at no cost to you; for bigger jobs, I source the right specialists and manage the work myself. You hire one consultant. You get the network.</p>
       </section>
 
@@ -529,9 +544,10 @@
             copied!
           </span>
         </div>
-        <button type="button" class="email-mark" id="copy-email-btn" aria-label="Copy email address to clipboard">
+        <a class="email-mark" id="copy-email-btn" href="mailto:kris@roadruck.com">
           <span class="light">kris</span><span class="at">@</span><span class="heavy">roadruck</span><span class="tld">.com</span>
-        </button>
+        </a>
+        <span class="copy-fail" id="copy-fail" hidden>copy failed &mdash; select: <span class="sel">kris@roadruck.com</span></span>
       </div>
       <p>No forms, no calendar-link gauntlet. Email me, tell me what's broken or what you're trying to grow, and I'll tell you honestly whether I'm the right person for it.</p>
     </div>
@@ -625,29 +641,41 @@
   });
   paintToggle();
 
-  /* --- burger menu & focus trap --- */
+  /* --- burger menu disclosure --- */
   var burger = document.getElementById('burger');
   var links = document.getElementById('nav-links');
-  var navRight = document.querySelector('.nav-right');
   
-  function setMenu(open){
+  function setMenu(open, keepFocus){
     var wasOpen = burger.getAttribute('aria-expanded') === 'true';
     burger.setAttribute('aria-expanded', open ? 'true' : 'false');
     burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     links.classList.toggle('open', open);
     /* closing a menu that contains the focused element strands focus on <body>;
-       hand it back to the burger (mobile only - desktop links are always visible) */
-    if (wasOpen && !open && window.matchMedia('(max-width:720px)').matches){
+       hand it back to the burger (mobile only - desktop links are always visible).
+       keepFocus skips this when focus has already moved on naturally. */
+    if (wasOpen && !open && !keepFocus && window.matchMedia('(max-width:720px)').matches){
       burger.focus();
     }
   }
+
+  /* tabbing out of the open menu closes it quietly; focus continues on its way */
+  links.addEventListener('focusout', function(e){
+    if (burger.getAttribute('aria-expanded') !== 'true') return;
+    if (!window.matchMedia('(max-width:720px)').matches) return;
+    var to = e.relatedTarget;
+    if (!to) return; /* focus went nowhere trackable; leave the menu alone */
+    if (links.contains(to) || to === burger) return;
+    setMenu(false, true);
+  });
   
   burger.addEventListener('click', function(){
     setMenu(burger.getAttribute('aria-expanded') !== 'true');
   });
   
   links.addEventListener('click', function(e){
-    if (e.target.tagName === 'A') setMenu(false);
+    var link = e.target.closest('a');
+    /* the email link manages its own closure after the async copy resolves */
+    if (link && link.id !== 'nav-copy-btn') setMenu(false);
   });
   
   document.addEventListener('keydown', function(e){
@@ -657,43 +685,37 @@
     }
   });
 
-  // Mobile nav focus trap
-  navRight.addEventListener('keydown', function(e){
-    if (burger.getAttribute('aria-expanded') !== 'true') return;
-    if (e.key === 'Tab') {
-      var focusables = navRight.querySelectorAll('button, a[href]');
-      if (!focusables.length) return;
-      var first = focusables[0];
-      var last = focusables[focusables.length - 1];
-      
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          last.focus();
-          e.preventDefault();
-        }
-      } else {
-        if (document.activeElement === last) {
-          first.focus();
-          e.preventDefault();
-        }
-      }
-    }
-  });
+  /* crossing to desktop width closes the disclosure so stale
+     aria-expanded/open state can't survive a resize round-trip */
+  var navMq = window.matchMedia('(max-width:720px)');
+  var onNavMq = function(ev){ if (!ev.matches){ setMenu(false); } };
+  if (navMq.addEventListener){ navMq.addEventListener('change', onNavMq); }
+  else if (navMq.addListener){ navMq.addListener(onNavMq); }
+
 
   /* --- copy helpers (async + fallback + live region) --- */
-  function announceCopySuccess() {
+  var statusTimers = [];
+  function announce(msg, hold) {
     var status = document.getElementById('copy-status');
-    if (status) {
-      status.textContent = 'Email address copied to clipboard';
-      setTimeout(function() { status.textContent = ''; }, 2000);
-    }
+    if (!status) return;
+    /* clear first so identical repeat messages reliably re-announce */
+    statusTimers.forEach(clearTimeout); statusTimers = [];
+    status.textContent = '';
+    statusTimers.push(setTimeout(function(){ status.textContent = msg; }, 50));
+    statusTimers.push(setTimeout(function(){ status.textContent = ''; }, hold));
+  }
+  function announceCopySuccess() {
+    announce('Email address copied to clipboard', 2000);
   }
   function announceCopyError(msg) {
-    var status = document.getElementById('copy-status');
-    if (status) {
-      status.textContent = msg || 'Failed to copy email address. You can copy it manually: kris@roadruck.com';
-      setTimeout(function() { status.textContent = ''; }, 4500);
-    }
+    announce(msg || 'Failed to copy email address. You can copy it manually: kris@roadruck.com', 4500);
+  }
+  var copyFail = document.getElementById('copy-fail');
+  function showCopyFailure() {
+    if (copyFail) copyFail.hidden = false;
+  }
+  function clearCopyFailure() {
+    if (copyFail) copyFail.hidden = true;
   }
 
   async function copyEmailToClipboard() {
@@ -736,13 +758,18 @@
   /* --- copy email to clipboard (Main Contact button) --- */
   var copyBtn = document.getElementById('copy-email-btn');
   if (copyBtn) {
-    copyBtn.addEventListener('click', async function() {
+    /* only claim "copy" in the accessible name once JS is actually driving */
+    copyBtn.setAttribute('aria-label', 'kris@roadruck.com — copy to clipboard');
+    copyBtn.addEventListener('click', async function(e) {
+      e.preventDefault(); /* JS present: copy instead of launching mail */
       var success = await copyEmailToClipboard();
       if (success) {
         announceCopySuccess();
+        clearCopyFailure();
         showCopyFeedback();
       } else {
         announceCopyError();
+        showCopyFailure(); /* persists until a copy succeeds; no timer race */
       }
     });
   }
@@ -750,18 +777,33 @@
   /* --- copy email to clipboard (Nav Menu button) --- */
   var navCopyBtn = document.getElementById('nav-copy-btn');
   if (navCopyBtn) {
-    navCopyBtn.addEventListener('click', async function() {
+    navCopyBtn.setAttribute('aria-label', 'kris@roadruck.com — copy to clipboard');
+    /* canonical label captured once; a single tracked timer restores it, so
+       rapid re-clicks can neither record "copied!" as the original text nor
+       leave stale timers racing each other */
+    var navCopyLabel = navCopyBtn.textContent;
+    var navCopyTimer;
+    function resetNavCopyLabelAfter(delay) {
+      clearTimeout(navCopyTimer);
+      navCopyTimer = setTimeout(function () {
+        navCopyBtn.textContent = navCopyLabel;
+      }, delay);
+    }
+    navCopyBtn.addEventListener('click', async function(e) {
+      e.preventDefault(); /* JS present: copy instead of launching mail */
       var success = await copyEmailToClipboard();
       if (success) {
         announceCopySuccess();
-        setMenu(false);
-        var originalText = navCopyBtn.textContent;
-        navCopyBtn.innerHTML = '<svg class="success-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> copied!';
-        setTimeout(function() {
-          navCopyBtn.textContent = originalText;
-        }, 2000);
+        clearCopyFailure();
+        navCopyBtn.innerHTML = '<svg class="success-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:-2px; margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> copied!';
+        /* let the confirmation land before the menu closes; the collapse then
+           reads as completion rather than an unexplained disappearance */
+        setTimeout(function() { setMenu(false); }, 800);
+        resetNavCopyLabelAfter(2000);
       } else {
         announceCopyError();
+        navCopyBtn.textContent = 'copy failed';
+        resetNavCopyLabelAfter(2000);
       }
     });
   }
