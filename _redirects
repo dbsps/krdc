@@ -1,17 +1,10 @@
-/*
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-
-/fonts/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.png
-  Cache-Control: public, max-age=604800
-
-/favicon.svg
-  Cache-Control: public, max-age=604800
-
-/favicon.ico
-  Cache-Control: public, max-age=604800
+# Path-level redirects for THIS Pages project (krisroadruck.com).
+# Host-level redirects (roadruck.com -> krisroadruck.com, apex -> www)
+# are configured as Redirect Rules in the Cloudflare dashboard — see DEPLOY.md.
+#
+# When you flat-file the blog, map old WordPress URLs here, e.g.:
+# /blog/you-need-a-cms/  /blog/you-need-a-cms.html  301
+#
+# Catch legacy WP cruft:
+/wp-admin/*  /  301
+/feed/  /  301
